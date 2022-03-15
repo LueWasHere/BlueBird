@@ -17,6 +17,11 @@ alpha = []
 
 after = ''
 
+intCheck = []
+
+for i in range(0, 9):
+    intCheck.append(str(i))
+
 def unknownMakeFunc(devMode, chars):
     global after
     global thismess
@@ -28,6 +33,12 @@ def unknownMakeFunc(devMode, chars):
     global after
     
     for i in range(0, len(ops)):
+        if chars in intCheck:
+            countT = ''
+            break
+        if chars == ' ':
+            countT = '<SPACER>'
+            break
         if chars == ops[i]:
             countT = i
             break
@@ -77,6 +88,9 @@ def from_input(inputS, devMode):
     
     # find single char tokens
     for chars in inputS:
+        if chars in intCheck:
+            print(Fore.GREEN + '[DEV] ' + Fore.LIGHTYELLOW_EX + f'INT creation: {chars}')
+            tokens.append(['<INT>', chars])
         unicount += 1
         if chars in alpha:
             unknown += chars
@@ -97,6 +111,12 @@ def from_input(inputS, devMode):
         
         if countT != f'<{unknown}>':
             for i in range(0, len(ops)):
+                if chars in intCheck:
+                    countT = ''
+                    break
+                if chars == ' ':
+                    countT = '<SPACER>'
+                    break
                 if chars == ops[i]:
                     countT = i
                     break
@@ -116,7 +136,8 @@ def from_input(inputS, devMode):
             #print('I just appended:', unknown)
             print(Fore.GREEN + '[DEV] ' + Fore.CYAN + f'[MSG]: {thismess[2]} ' + Fore.WHITE)
             tokens.append(f'<{unknown}>')
-            tokens.append(f'{after}')
+            if after != '':
+                tokens.append(f'{after}')
             countT = ''
             unknown = ''
         elif not devMode and countT == f'<{unknown}>':
