@@ -2,9 +2,9 @@ from ast import Str
 from colorama import Fore
 
 # dev messages
-thismess = ["Full token list: ", "Generating unknown... ", "Unknown finished! "]
+thismess = ['"Full token list: "', '"Generating unknown... "', '"Unknown finished! "']
 # ops
-ops = ['/', '+', '-', '*', '$', '%', '^', '&', '|', '\\', '#', '!', '@', '(', ')', '{', '}', '[', ']', ':', ';', '<', '>', '?', ',', '.']
+ops = ['/', '+', '-', '*', '$', '%', '^', '&', '|', '\\', '#', '!', '@', '(', ')', '{', '}', '[', ']', ':', ';', '<', '>', '?', ',', '.', '"', "'"]
 opsTk = ['<DIV>', '<PLUS>', '<MINUS>','<MULTIPLY>','<VAR_INCLUDE>','<PERCENT>','<POWER_BY>','<AND>','<OR>','<BACKSLASH>','<POUND>','<MACRO>','<CALL>','<PREN_LEFT>','<PREN_RIGHT>','<CPREN_LEFT>','<CPREN_RIGHT>','<SQPREN_LEFT>','<SQPREN_RIGHT>','<COLON>','<END_LINE>','<LESS_THAN>','<GREATER_THAN>','<QUERY>','<COMMA>','<PERIOD>']
 # token array
 tokens = []
@@ -14,6 +14,40 @@ countT = 0
 unknown = ''
 
 alpha = []
+
+after = ''
+
+def unknownMakeFunc(devMode, chars):
+    global after
+    global thismess
+    global tokens
+    global ops
+    global opsTk
+    global countT
+    global unknown
+    global after
+    
+    for i in range(0, len(ops)):
+        if chars == ops[i]:
+            countT = i
+            break
+        if i == len(tokens)-1 and len(unknown) == 0:
+            countT = '<FAIL>'
+        elif len(unknown) > 0:
+            countT = '<>'
+    if devMode and type(countT) == int:
+        print(Fore.GREEN + '[DEV] ' + Fore.LIGHTYELLOW_EX + opsTk[countT] + Fore.WHITE)
+    # print dev but only if countT is a str not int
+    if devMode and countT == '<FAIL>':
+        print(Fore.GREEN + '[DEV] ' + Fore.LIGHTYELLOW_EX + countT + Fore.WHITE)
+    if type(countT) == int:
+        after = opsTk[countT]
+    elif not countT == '<>':
+        after = countT
+
+    countT = f'<{unknown}>'
+    if devMode:
+        print(Fore.GREEN + '[DEV] ' + Fore.LIGHTYELLOW_EX + f'Unknown op created! {unknown}')
 
 for i in range(52):
     if i >= 26:
@@ -28,35 +62,39 @@ def from_input(inputS, devMode):
     global opsTk
     global countT
     global unknown
-
+    global after
+    
+    # token array
+    tokens = []
+    # token counting
+    countT = 0
+    # unknown ops
+    unknown = ''
+    
     after = ''
 
+    unicount = 0
+    
     # find single char tokens
     for chars in inputS:
+        unicount += 1
         if chars in alpha:
             unknown += chars
-            print(Fore.GREEN + '[DEV] ' + Fore.LIGHTYELLOW_EX + f'Unknown op creation... {chars}:{unknown}')
+            if devMode:
+                print(Fore.GREEN + '[DEV] ' + Fore.LIGHTYELLOW_EX + f'Unknown op creation... {chars}:{unknown}')
         if chars in ops and len(unknown) > 0:
-            for i in range(0, len(ops)):
-                if chars == ops[i]:
-                    countT = i
-                    break
-                if i == len(tokens)-1 and len(unknown) == 0:
-                    countT = '<FAIL>'
-                elif len(unknown) > 0:
-                    countT = '<>'
-            if devMode and type(countT) == int:
-                print(Fore.GREEN + '[DEV] ' + Fore.LIGHTYELLOW_EX + opsTk[countT] + Fore.WHITE)
-            # print dev but only if countT is a str not int
-            if devMode and countT == '<FAIL>':
-                print(Fore.GREEN + '[DEV] ' + Fore.LIGHTYELLOW_EX + countT + Fore.WHITE)
-            if type(countT) == int:
-                after = opsTk[countT]
-            elif not countT == '<>':
-                after = countT
-
-            countT = f'<{unknown}>'
-            print(Fore.GREEN + '[DEV] ' + Fore.LIGHTYELLOW_EX + f'Unknown op created! {unknown}')
+            unknownMakeFunc(devMode, chars)
+            #print('1')
+        elif chars in ops and unicount == len(inputS) and len(unknown) > 0:
+            unknownMakeFunc(devMode, chars)
+            #print('2')
+        elif chars == ' ' and len(unknown) > 0:
+            unknownMakeFunc(devMode, chars)
+            #print('3')
+        elif unicount == len(inputS) and len(unknown) > 0:
+            unknownMakeFunc(devMode, chars)
+            #print('4')
+        
         if countT != f'<{unknown}>':
             for i in range(0, len(ops)):
                 if chars == ops[i]:
@@ -81,9 +119,14 @@ def from_input(inputS, devMode):
             tokens.append(f'{after}')
             countT = ''
             unknown = ''
-        if type(countT) == int:
+        elif not devMode and countT == f'<{unknown}>':
+            tokens.append(f'<{unknown}>')
+            tokens.append(f'{after}')
+            countT = ''
+            unknown = ''
+        if type(countT) == int and len(str(countT))>0:
             tokens.append(opsTk[countT])
-        elif not countT == '<>':
+        elif not countT == '<>' and len(countT)>0:
             #print('adding', unknown)
             tokens.append(countT)  
     if devMode: 
