@@ -2,10 +2,10 @@ from ast import Str
 from colorama import Fore
 
 # dev messages
-thismess = ['"Full token list: "', '"Generating unknown... "', '"Unknown finished! "']
+thismess = ['"Full primative token list: "', '"Generating unknown... "', '"Unknown finished! "']
 # ops
 ops = ['=', '/', '+', '-', '*', '$', '%', '^', '&', '|', '\\', '#', '!', '@', '(', ')', '{', '}', '[', ']', ':', ';', '<', '>', '?', ',', '.', '"', "'"]
-opsTk = ['<EQUALS>', '<DIV>', '<PLUS>', '<MINUS>','<MULTIPLY>','<VAR_INCLUDE>','<PERCENT>','<POWER_BY>','<AND>','<OR>','<BACKSLASH>','<POUND>','<MACRO>','<CALL>','<PREN_LEFT>','<PREN_RIGHT>','<CPREN_LEFT>','<CPREN_RIGHT>','<SQPREN_LEFT>','<SQPREN_RIGHT>','<COLON>','<END_LINE>','<LESS_THAN>','<GREATER_THAN>','<QUERY>','<COMMA>','<PERIOD>', '<STR_MARK>', '<CHR_MARK']
+opsTk = ['<EQUALS>', '<DIV>', '<PLUS>', '<MINUS>','<MULTIPLY>','<VAR_INCLUDE>','<PERCENT>','<POWER_BY>','<AND>','<OR>','<BACKSLASH>','<POUND>','<MACRO>','<CALL>','<PREN_LEFT>','<PREN_RIGHT>','<CPREN_LEFT>','<CPREN_RIGHT>','<SQPREN_LEFT>','<SQPREN_RIGHT>','<COLON>','<END_LINE>','<LESS_THAN>','<GREATER_THAN>','<QUERY>','<COMMA>','<PERIOD>', '<STR_MARK>', '<STR_MARK>']
 # token array
 tokens = []
 # token counting
@@ -38,6 +38,9 @@ def unknownMakeFunc(devMode, chars):
             break
         if chars == ' ':
             countT = '<SPACER>'
+            break
+        if chars == '\n' or chars == '\\n':
+            countT = '<NLN>'
             break
         if chars == ops[i]:
             countT = i
@@ -89,7 +92,8 @@ def from_input(inputS, devMode):
     # find single char tokens
     for chars in inputS:
         if chars in intCheck:
-            print(Fore.GREEN + '[DEV] ' + Fore.LIGHTYELLOW_EX + f'INT creation: {chars}')
+            if devMode:
+                print(Fore.GREEN + '[DEV] ' + Fore.LIGHTYELLOW_EX + f'INT creation: {chars}')
             tokens.append(['<INT>', chars])
         unicount += 1
         if chars in alpha:
@@ -113,6 +117,9 @@ def from_input(inputS, devMode):
             for i in range(0, len(ops)):
                 if chars in intCheck:
                     countT = ''
+                    break
+                if chars == '\n' or chars == '\\n':
+                    countT = '<NLN>'
                     break
                 if chars == ' ':
                     countT = '<SPACER>'
@@ -142,7 +149,8 @@ def from_input(inputS, devMode):
             unknown = ''
         elif not devMode and countT == f'<{unknown}>':
             tokens.append(f'<{unknown}>')
-            tokens.append(f'{after}')
+            if after != '':
+                tokens.append(f'{after}')
             countT = ''
             unknown = ''
         if type(countT) == int and len(str(countT))>0:
