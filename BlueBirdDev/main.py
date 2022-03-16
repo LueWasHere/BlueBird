@@ -2,7 +2,7 @@ import lexer
 import tokenLEX
 from colorama import Fore
 
-dev = True
+dev = False
 
 tokens = []
 
@@ -13,7 +13,9 @@ while True:
     print(Fore.WHITE, end='')
     tokens = tokenLEX.globalLex(tokens, dev)
     #print(tokens) # only used if I need to see the tokens without activating devMode
-    if tokens == ['<dev>', '<PREN_LEFT>', '<PREN_RIGHT>']:
+    if dev:
+        print('SUP TOKENS: ' + str(tokens))
+    if tokens == ['<CALL>', '<dev>']:
         if dev:
             dev = False
         else:
