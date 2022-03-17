@@ -2,9 +2,11 @@ from colorama import Fore
 
 def globalLex(tokens, dev):
     tokList = ['<EQUALS>', '<DIV>', '<PLUS>', '<MINUS>','<MULTIPLY>','<VAR_INCLUDE>','<PERCENT>','<POWER_BY>','<AND>','<OR>','<BACKSLASH>','<POUND>','<MACRO>','<CALL>','<PREN_LEFT>','<PREN_RIGHT>','<CPREN_LEFT>','<CPREN_RIGHT>','<SQPREN_LEFT>','<SQPREN_RIGHT>','<COLON>','<END_LINE>','<LESS_THAN>','<GREATER_THAN>','<QUERY>','<COMMA>','<PERIOD>', '<STR_MARK>', '<STR_MARK>', '<SPACER>']
-
+    
     str = False
     spickUp = 0
+    intC = False
+    ipickup = 0
     chr = False
     cpickup = 0
     float = False
@@ -16,6 +18,42 @@ def globalLex(tokens, dev):
     ops = ['=', '/', '+', '-', '*', '$', '%', '^', '&', '|', '\\', '#', '!', '@', '(', ')', '{', '}', '[', ']', ':', ';', '<', '>', '?', ',', '.', '"', "'"]
     
     while i != len(tokens):
+        if i == len(tokens) or i > len(tokens):
+            if dev:   
+                print(Fore.GREEN + '[DEV] ' + Fore.LIGHTYELLOW_EX + f'Broke at {i}' + Fore.WHITE)
+            break
+        if type(tokens[i]) == list:
+            if tokens[i][0] == '<INT>':
+                if not str:
+                    intC = True
+        if intC == True:
+            buildTrueInt = ''
+            while True:
+                if i == len(tokens) or i > len(tokens):
+                    if dev:   
+                        print(Fore.GREEN + '[DEV] ' + Fore.LIGHTYELLOW_EX + f'Broke at {i}' + Fore.WHITE)
+                    break
+                if i == len(tokens):
+                    if type(tokens[i]) == list:
+                        buildTrueInt += (tokens[i][1])
+                    else:
+                        buildTrueInt += (tokens[i])
+                if type(tokens[i]) != list and tokens[i] != '<PERIOD>': 
+                    break
+                if tokens[i] == '<PERIOD>':
+                    buildTrueInt += '.'
+                    intC = False
+                    float = True                
+                buildTrueInt += (tokens[i][1])
+                i += 1
+            if float:
+                ntokens.append(['<FLOAT>', buildTrueInt])
+            elif intC:
+                ntokens.append(['<INT>', buildTrueInt])
+            if i == len(tokens) or i > len(tokens):
+                if dev:   
+                    print(Fore.GREEN + '[DEV] ' + Fore.LIGHTYELLOW_EX + f'Broke at {i}' + Fore.WHITE)
+                break
         if tokens[i] == '<BACKSLASH>':
             try:
                 print()
@@ -43,8 +81,11 @@ def globalLex(tokens, dev):
             if str:
                 if dev:
                     print(Fore.GREEN + '[DEV] ' + Fore.LIGHTYELLOW_EX + f'Adding token to str pram="is not in the tokList"::::::Str=\'{buildStr}\' + \'{tokens[i]}\'' + Fore.WHITE)
-                a=tokens[i].replace('<', '')
-                a=a.replace('>', '')
+                if not type(tokens[i]) == list:
+                    a=tokens[i].replace('<', '')
+                    a=a.replace('>', '')
+                else:
+                    a = tokens[i][1]
                 buildStr += a
         if tokens[i] == '<SPACER>' and str:
             if dev:
