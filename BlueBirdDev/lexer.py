@@ -19,7 +19,7 @@ after = ''
 
 intCheck = []
 
-for i in range(0, 9):
+for i in range(0, 10):
     intCheck.append(str(i))
 
 def unknownMakeFunc(devMode, chars):
